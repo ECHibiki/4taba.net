@@ -8,8 +8,8 @@
 ;;; Edit the settings below ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define-public website-title "Kotatsu Channel")
-(define-public greeting "<br>Greeting message goes here<br><br>")
+(define-public website-title "下葉二ちゃんねる")
+(define-public greeting "Shitaba Ni Youkoso<br/>")
 (define-public default-comment "ｷﾀ━━━(ﾟ∀ﾟ)━━━!!") ; Default comment if left blank by user
 (define-public javascript-enabled #t)
 
@@ -55,7 +55,7 @@
 (define-public default-OP-template 'post-OP) ; Template function for thread OP's
 
 ;(define-public default-post-template post-tpl) ; Template function for normal posts
-(define-public default-name "Nameless")
+(define-public default-name "Anonymous")
 (define-public default-subject "Untitled") ; Default new thread subject if left blank by user
 (define-public default-board-message "<span class=\"shade\">【File uploads are unmodified. Please use caution when downloading.】</span>")
 (define-public default-page-count 10)
@@ -64,9 +64,9 @@
 
 ;;; Enable/Disable banners and stylesheets (files will be searched in pub/img/ and pub/css/ respectively)
 (define-public banner-rotation-period 300) ; in seconds
-(define-public banners '("banner-sample.png"))
-(define-public styles '("kotatsu" "multi-theme" "tomorrow" "pseud0ch" "yotsuba" "yotsubab" "ergonomic" "computer"))
-(define-public default-style "kotatsu")
+(define-public banners '("banner1.jpg" "banner2.jpg" "banner3.jpg"))
+(define-public styles '("multi-theme" "kotatsu" "tomorrow" "pseud0ch" "yotsuba" "yotsubab" "ergonomic" "computer"))
+(define-public default-style "kotatsu-red")
 
 ;;; Define boards here
 (define-public post-preview-count 5) ; Amount of posts to display under a thread when viewing from a board page
@@ -95,6 +95,26 @@
                                       (message . ,(string-append "This board shows threads from all unlisted boards.<br>" default-board-message))))
                         ("a"    . ((title    . "Anime & Manga")
                                    (theme    . "yotsubab")))
+                        ("ni"  . ((title    . "日本裏")
+                                  (message  . ,(string-append "<div style=\"text-align:left;width:260px\"><span class=\"aa\">　 　　 　./＼　　　　　　　 /＼<br>
+　　　　 /:::::::ヽ＿＿＿＿/::::::::ヽ、<br>
+　　　 ／　::. ＿　　.:::::::::::::　 ＿::::ヽ_<br>
+　　／　／　°ヽ_ヽｖ /:／　°ヽ::::::ヽ<br>
+　/　／.（￣（￣＿＿丶 ..（￣（＼　 ::::|<br>
+. |　.:::::::: ）　 ）/ / ｔｰｰｰ|ヽ） 　）　.::::: ::|<br>
+. |　.::::...（　 （..|｜.　　　 |　（　 （　　　 ::|<br>
+. |　:::.　 ）　 ）| |⊂ニヽ .| !　） 　）　 　::::|<br>
+　|　:　 （　 （ | |　 |:::T::::.|　（　 （　　 　::|</span></div><br>" default-board-message))
+                                  (name     . "名無しさん")
+                                  (theme    . "pseud0ch")))
+                        ("d"   . ((title    . "二次元エロ")
+                                  (message  . ,(string-append "Welcome to the 2D erotic board.<br>Please try to keep most of the content Japanese.<br>" default-board-message))
+                                  (name     . "変態")
+                                  (theme    . "yotsuba")))
+                        ("cc"  . ((title    . "Computer Club")
+                                  (message  . ,(string-append "Hi, welcome to the computer club, I'll be your guide! :(){ :|:& };:<br>" default-board-message))
+                                  (name     . "guest@cc")
+                                  (theme    . "computer")))
                         ("f"   . ((title    . "Flash & HTML5")
                                   (theme    . "yotsuba")
                                   (message  . ,(string-append "[embed flash banner here]<br>"default-board-message))
@@ -105,17 +125,15 @@
                                   (mimetypes-blacklist . ())
                                   (board-template . board-flash-tpl)
                                   (preview-OP-template . post-OP-flash)))
-                        ("prog" . ((title    . "Computers & Programming")
-                                   (theme    . "computer")))
-                        ("ck"   . ((title    . "Cooking")
-                                   (theme    . "ergonomic")))
-                        ("jp"   . ((title    . "Otaku Culture")
-                                   (theme    . "pseud0ch")))
-                        ("b"    . ((title    . "Random")
-                                   (theme    . "yotsuba")))))
+                        ("v"   . ((title    . "Video Games")
+                                  (name     . "Player")
+                                  (theme    . "kotatsu")))
+                        ("ho"  . ((title    . "Other")
+                                  (message  . ,(string-append "Welcome to the Other board.<br>Enjoy your stay.<br>" default-board-message))
+                                  (theme    . "yotsuba")))))
 
 ;;; Define mods:
-(define-public mods `(; NAME      PERMISSIONS  DEFAULT_PASSWORD(this field is only used until the mod changes their password)
+(define-public mods `(; NAME      PERMISSIONS  DEFAULT_PASSWORD(this field is only used until the mod changes their password)))
                       ("Admin"   "*"          "abc123")
                       ("SomeMod" "*"          "abc123")))
 

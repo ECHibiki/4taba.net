@@ -83,9 +83,12 @@
              '())
          "[" (a (@ (href "/index")) "HOME") "] "
          "[" (a (@ (href "/frames") (target "_top")) "Frames") "] "
+         "[" (a (@ (href "https://archive.4taba.net")) "Archive") "] "
          "[" (a (@ (href "/about")) "About") "] "
          "[" (a (@ (href "/rules")) "Rules") "] "
-         "[" (a (@ (href "/news")) "News") "] "))
+         "[" (a (@ (href "/news")) "News") "] "
+		 )
+	 )
        (hr))
       (section
        (div (@ (class ,(format #f "mid ~a" mid-class)))
@@ -133,6 +136,7 @@
 (define (index-tpl style style-menu admin news-block)
   (master-tpl admin website-title style style-menu "none" "infopage" greeting
     `((center
+       (img (@ (src "/pub/img/logo.png")))
        (table
         (tr
          (td
@@ -207,6 +211,7 @@
            (div (@ (style "padding-bottom:5px")) (a (@ (href "/logoff") (target ,target)) "Log Off")))))
       (h3 "Information")
       (div (@ (style "padding-bottom:5px")) (a (@ (href "/") (target "_top")) "HOME"))
+	  (div (@ (style "padding-bottom:5px")) (a (@ (href "https://archive.4taba.net") (target ,target)) "Archive"))
       (div (@ (style "padding-bottom:5px")) (a (@ (href "/about") (target ,target)) "About"))
       (div (@ (style "padding-bottom:5px")) (a (@ (href "/rules") (target ,target)) "Rules"))
       (div (@ (style "padding-bottom:5px")) (a (@ (href "/news") (target ,target)) "News")))))
@@ -217,25 +222,66 @@
       "Place holder." (br)
       (table (@ (border "2") (valign "top"))
        (tr (td (@ (class "stack"))
-            (ul (li (a (@ (href "#item1")) "Item 1"))
-                (li (a (@ (href "#item2")) "Item 2"))))))
+            (ul (li (a (@ (href "#what")) "What is Shitaba?"))
+                (li (a (@ (href "#unlisted")) "What are unlisted boards?"))
+                (li (a (@ (href "#side")) "What are side threads?"))
+                (li (a (@ (href "#format")) "How are posts formatted?"))
+                (li (a (@ (href "#html5")) "How do I upload HTML5 files?"))))))
       (br)(hr)(br)
       (table (@ (border "2") (valign "top"))
        (tr (td (@ (class "stack"))
-            (div (@ (id "item1"))
-             (h3 "Item 1")
-             (blockquote "Item 1 description."))
-            (div (@ (id "item2"))
-             (h3 "Item 2")
-             (blockquote "Item 2 description."))))))))
+            (div (@ (id "what"))
+             (h3 "What is Shitaba?")
+             (blockquote "Prounounced \"Shitaba\", it is an imageboard for discussing various hobbyist topics, modelled after Japanese style discussion and imageboards such as 2channel and Futaba, and English imageboards such as 4chan."))
+            (div (@ (id "unlisted"))
+             (h3 "What are unlisted boards?")
+             (blockquote "A feature to give flexibility to the board list." (br)
+                         (br)
+                         "These are not user created/owned boards. Users can't give them a title or control them any differently from the main boards." (br)
+                         "Unlisted boards may be purged and/or repurposed at any time. For more stability please use the main boards." (br)
+                         (br)
+                         "To use, simply modify the URL to point to the board label of your choice (e.g. <a href="/board/example">/board/example</a>) and start posting." (br)))
+	    (div (@ (id "side"))
+             (h3 "What are side threads?")
+             (blockquote "Shitaba allows for users to create comment chains within posts."  (br) (br)
+
+		"By putting a post number into the options field it will create a more direct response to a poster putting a box bellow his post with your comment in it. In order to respond to a side thread put the post number of the comment into the options field just like the previous poster did." (br)(br)
+                         "The hope is to prevent threads from being derailed by arguments and flamewars. Overall a benefit to self moderation." (br)
+                         (br)))
+            (div (@ (id "format"))
+             (h3 "How are posts formatted?")
+             (blockquote "Unlike most sites, whitespace is not collapsed on Shitaba. If you add 5 spaces between words you'll get 5 spaces between words." (br)
+                         "This gives you more control in formatting your posts. Additionally text next to images in posts will not wrap underneath the image so the formatting will be preserved." (br)
+                         (br)>
+                         "The following BBCodes are available:" (br)
+                         (table (@ (border 1) (style "border-collapse:separate"))
+                          (tr (th "What you type") (th "How it will appear"))
+                          (tr (td (@ (style "border:1px solid #000")) "[code]A monospace code block.[/code]")
+                              (td (@ (style "border:1px solid #000")) (span (@ (class "code")) "A monospace code block.")))
+                          (tr (td (@ (style "border:1px solid #000")) "[aa]Text formatted to properly display Japanese style text art.[/aa]")
+                              (td (@ (style "border:1px solid #000")) (span (@ (class "aa")) "Text formatted to properly display Japanese style text art.")))
+                          (tr (td (@ (style "border:1px solid #000")) "[spoiler]Spoilered text.[/spoiler]")
+                              (td (@ (style "border:1px solid #000"))
+                               (span (@ (class "spoiler")) "Spoilered text.</span> <span class=\"shade\">(highlight with mouse to reveal the text)"))))))
+            (div (@ (id "html5"))
+             (h3 "How do I upload HTML5 files?")
+             (blockquote "As Flash is being phased out, and will not be receiving updates in the future, a replacement is needed. The HTML5 specification has widely been used across the internet to replace Flash. Although it's not the same thing, it seems flexible enough to do the job, and mostly seems to be lacking tools to make development as easy as Flash, and lacking a single container filetype." (br)
+                         (br)
+                         "We are attempting to work around the 2nd deficiency by simply using .tar.gz files as the container for uploading media collections." (br)
+                         (ul (li "Place all the necessary media files inside a single directory and make sure the final project is re-locatable (you should be able to move the location of the directory and still run the project).")
+                             (li "The main entry point should be named " (b "main.html") " (this is the html page the user will run when they open the file).")
+                             (li "Any file named " (b "index.html") " will be overwritten by the server when it unpacks the project.")
+                             (li "Create the tar.gz archive of the project and make sure it has extension \".html5\":")
+                             (ul (li (span (@ (class "code")) "~$ tar cfvz your-project.html5 project-directory")))
+                             (li "Upload the .html5 archive."))))))))))
 
 (define (rules-tpl style style-menu admin)
   (master-tpl admin (string-append "Rules - " website-title) style style-menu "none" "infopage" "<h2>Rules</h2>"
     `(center
       (table (@ (border "2") (valign "top"))
        (tr (td (@ (class "stack"))
-            (ol (li (b "Some rule.")) (br)
-                (li (b "Some other rule.")) (br))))))))
+            (ol (li (b "Don't post anything illegal under United States law.")) (br)
+                (li (b "No excessive spam or advertising.")))))))))
 
 (define (news-tpl style style-menu admin news-block)
   (master-tpl admin (string-append "News - " website-title) style style-menu "none" "infopage" "<h2>News</h2>"
@@ -247,7 +293,7 @@
       "For feedback, suggestions, bug reports, or help:" (br)
       (table (@ (border "2") (valign "top"))
        (tr (td (@ (class "stack"))
-            "GitLab: " (a (@ (href "https://gitlab.com/ison2/kotatsu")) "https://gitlab.com/ison2/kotatsu")))
+            "GitHub: " (a (@ (href "https://github.com/ECHibiki/kotatsu")) "https://github.com/ECHibiki/kotatsu")))
        (tr (td (@ (class "stack"))
             "Email: " (img (@ (src "/pub/img/email.png")))))))))
 
@@ -272,7 +318,7 @@
 (define (imgops-tpl image board-uri threadnum)
   (if image
     `(" " (span (@ (class "imgops"))
-                "[" (a (@ (href ,(format #f "https://imgops.com/http://~a/pub/img/~a/~a/~a" (get-conf '(host name)) board-uri threadnum image))
+                "[" (a (@ (href ,(format #f "https://imgops.com/https://~a/pub/img/~a/~a/~a" (get-conf '(host name)) board-uri threadnum image))
                           (target "_blank"))
                        "ImgOps")
                 "]"))
@@ -382,6 +428,7 @@
     personal-block))
       
 (define (post-tpl mode board-uri threadnum postnum name date image iname thumb size comment subposts replies)
+  ;(display size)(newline)
   `((table (@ (class "post-frame"))
     (tr
      (td (@ (valign "top") (weight "bold")) "»")
@@ -389,7 +436,7 @@
       (div (@ (border "1") (id ,postnum "p") (class "post"))
        (input (@ (type "checkbox") (name "posts") (value ,board-uri "/" ,threadnum "/" ,postnum)))
        (b
-        (a (@ (href "/thread/" ,board-uri "/" ,threadnum "#" ,postnum "p")) ,(number->string postnum)) " "
+        (a (@ (href "/thread/" ,board-uri "/" ,threadnum "#" ,postnum "p") (onclick "postNumClick(this)")) ,(number->string postnum)) " "
         (span (@ (class "name")) ,name) " "
         (span (@ (class "date")) ,date)
         ,(imgops-tpl image board-uri threadnum))
@@ -409,6 +456,7 @@
                        (href ,(format #f "/pub/img/~a/~a/~a" board-uri threadnum image)))
                   (img (@ (src "/pub/img/" ,board-uri "/" ,threadnum "/" ,thumb)
                           (onclick "ret=thumbnailClick(this);return ret;")
+			  (onload "swapIsLoaded(this)")
                           (data-swap-with "/pub/img/" ,board-uri "/" ,threadnum "/" ,image)
                           (data-mimetype ,(car (string-split size #\,)))))))
             '())
@@ -575,11 +623,12 @@
        (div (@ (class ,(if (eq? mode 'preview) "title-bar" "")))
         (u ,@(if sticky `(" " (img (@ (src "/pub/img/sticky.png") (title "Sticky")))) '())
            (input (@ (type "checkbox") (name "posts") (value ,board-uri "/" ,threadnum "/" 1)))
+	   ()
            (a (@ (href "/thread/" ,board-uri "/" ,threadnum))
             "【" ,(number->string threadnum) "】"
             (span (@ (class "title"))
              ,subject " "))
-            "[" (a (@ (href "/thread/" ,board-uri "/" ,threadnum "?last=50"))
+            "[" (a  (@ (href "/thread/" ,board-uri "/" ,threadnum "?last=50"))
                  "last50") " "
                 (a (@ (href "/board/" ,board-uri)) "/" ,board-html "/")
             "]")
@@ -588,14 +637,18 @@
              (if (> remaining 0)
                `(u (span (@ (class "warning")) " This thread has been marked old and will be deleted in " ,(human-readable-interval remaining)))
                `(u (span (@ (class "warning")) " This thread has been marked for deletion"))))
-           '()))
-       (br)
-       (b (a (@ (href "/thread/" ,board-uri "/" ,threadnum "#1p")) "1") " "
-          (span (@ (id "1p") (class "name")) ,name) " "
-          (span (@ (class "date")) ,date) " "
+           '())
+	 "&nbsp;"
+         (a (@ (title , "Hide thread") (href "javascript:void(0);") (onclick "hideThread(this,'" , board , "tbody" , threadnum "')") (class "close-thread") ) "[ ╳ ]")
+       )
+       (div (@ (id , board , "tbody" , threadnum))
+        (br)
+        (b (a (@ (href "/thread/" ,board-uri "/" ,threadnum "#1p") (onclick "postNumClick(this)")) "1") " "
+           (span (@ (id "1p") (class "name")) ,name) " "
+           (span (@ (class "date")) ,date) " "
           ,(imgops-tpl image board-uri threadnum))
-       (br)
-       ,@(if image
+        (br)
+        ,@(if image
            `("File: " (a (@ (title ,iname)
                             (href "/pub/img/" ,board-uri "/" ,threadnum "/" ,(if (member (string-downcase (cdr name+ext)) '("sfw" "html5"))
                                                                            (if (cdr name+ext) (string-append (car file+ext) "." (cdr name+ext)) "")
@@ -605,22 +658,28 @@
              " (" ,size ")"
              (br))
            '())
-       ,(if image
+        ,(if image
           `(a (@ (target "_top")
                  (href "/pub/img/" ,board-uri "/" ,threadnum "/" ,image))
             (img (@ (class "OPimg")
                     (src "/pub/img/" ,board-uri "/" ,threadnum "/" ,thumb)
                     (onclick "ret=thumbnailClick(this);return ret;")
-                    (data-swap-with "/pub/img/" ,board-uri "/" ,threadnum "/" ,image)
+                    (onload "swapIsLoaded(this)")
+		    (data-swap-with "/pub/img/" ,board-uri "/" ,threadnum "/" ,image)
                     (data-mimetype ,(car (string-split size #\,))))))
           '())
-       (blockquote ,(truncate-comment comment max-comment-preview-lines mode))
-       ,(if (and (eq? mode 'preview) (> postcount (+ post-preview-count 1)))
+        (blockquote ,(truncate-comment comment max-comment-preview-lines mode))
+        ,(if (and (eq? mode 'preview) (> postcount (+ post-preview-count 1)))
           `(span (@ (class "shade")) ,(number->string (- postcount post-preview-count 1)) " posts omitted")
           '())
-
-       ,replies
-       (br (@ (style "clear:both")))))))
+        ,replies
+        (br (@ (style "clear:both")))
+        )
+         (script "initThread(\"" , board , "tbody" , (number->string threadnum) "\")")
+       )
+     )
+   )
+ )
 
 (define (post-OP-flash-tpl mode board board-html board-uri threadnum postcount subject name date image iname thumb size comment old sticky replies)
   (let ((name+ext (or (and iname (separate-extension iname)) '("" . #f)))
@@ -729,7 +788,7 @@ TO VIEW THE ACTUAL FILE DATA VISIT THE src LINK BELOW.
                ": " ,(format #f "~a (w:~a h:~a ~a)" filename width height fsize)))
           (tr (@ (style "width:100%;height:100%"))
            (td (@ (style "text-align:center;width:100%;height:100%"))
-               (iframe (@ (style "margin-left:auto;margin-right:auto;border:none;width:" ,width ";height:" ,height)
+               (embed (@ (style "margin-left:auto;margin-right:auto;border:none;width:100%;height:100%")
                           (src "/pub/img/" ,board-uri "/" ,threadnum "/" ,entrypoint)
                           (sandbox "allow-scripts")
                           (allowfullscreen "allowfullscreen")) #f))))))))

@@ -21,6 +21,10 @@ function initSidebar() {
     }
 }
 
+function initThread(target_id){
+	document.getElementById(target_id).style.display = localStorage[target_id];
+}
+
 function showSidebar() {
     var bar_width = 110;
     var margin = 4;
@@ -56,6 +60,16 @@ function hideAdminLinks() {
     }
 }
 
+function hideThread(e, target_id){
+    var thread_body = document.getElementById(target_id);
+    var display_type = thread_body.style.display == "none" ? "block" : "none";
+
+    thread_body.style.display = display_type;
+    localStorage[target_id] = display_type;
+
+    return false;
+}
+
 function thumbnailClick(e) {
     var src = e.src;
     var swap = e.dataset.swapWith;
@@ -68,8 +82,8 @@ function thumbnailClick(e) {
         p = p.offsetParent;
     }
 
-    if (['JPEG','PNG','GIF'].indexOf(mimetype) > -1) {
-        //e.style.opacity = 0.5;
+    if (['JPEG','PNG','GIF', 'WEBP'].indexOf(mimetype) > -1) {
+        e.style.opacity = 0.5;
         e.src = swap;
         e.dataset.swapWith = src;
         if (window.scrollY > offsetTop) {
@@ -79,4 +93,12 @@ function thumbnailClick(e) {
     } else {
         return true;
     }
+}
+
+function swapIsLoaded(e){
+	e.style.opacity = 1;
+}
+
+function postNumClick(e){
+	document.forms[1].elements["comment"].value+=">>"+e.textContent;
 }

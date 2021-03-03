@@ -21,6 +21,10 @@ function initSidebar() {
     }
 }
 
+function initThread(target_id){
+	document.getElementById(target_id).style.display = localStorage[target_id];
+}
+
 function showSidebar() {
     var bar_width = 110;
     var margin = 4;
@@ -35,11 +39,12 @@ function showSidebar() {
 <a href="/index" target=""><img src="/pub/img/favicon.ico" /></a><br />[<a target="_top" href="javascript:void(0);" onclick="hideSidebar();">Hide Menu ⇤</a>]<br /><br /><div style="padding-bottom:5px"><a href="/board/all" target="">All Threads</a></div>
 <div style="padding-bottom:5px"><a href="/board/listed" target="">Listed Threads</a></div>
 <div style="padding-bottom:5px"><a href="/board/unlisted" target="">Unlisted Threads</a></div><br><hr><h3>Boards</h3><div style="padding-bottom:5px"><a href="/board/a" target="">Anime & Manga</a></div>
+<div style="padding-bottom:5px"><a href="/board/ni" target="">日本裏</a></div>
+<div style="padding-bottom:5px"><a href="/board/d" target="">二次元エロ</a></div>
+<div style="padding-bottom:5px"><a href="/board/cc" target="">Computer Club</a></div>
 <div style="padding-bottom:5px"><a href="/board/f" target="">Flash & HTML5</a></div>
-<div style="padding-bottom:5px"><a href="/board/prog" target="">Computers & Programming</a></div>
-<div style="padding-bottom:5px"><a href="/board/ck" target="">Cooking</a></div>
-<div style="padding-bottom:5px"><a href="/board/jp" target="">Otaku Culture</a></div>
-<div style="padding-bottom:5px"><a href="/board/b" target="">Random</a></div><br /><hr /><br /><div id="sidebar-admin-links"><h3>Admin Links</h3><div style="padding-bottom:5px"><a href="/panel" target="">Admin Panel</a></div><div style="padding-bottom:5px"><a href="/logoff" target="">Log Off</a></div></div><h3>Information</h3><div style="padding-bottom:5px"><a href="/" target="_top">HOME</a></div><div style="padding-bottom:5px"><a href="/about" target="">About</a></div><div style="padding-bottom:5px"><a href="/rules" target="">Rules</a></div><div style="padding-bottom:5px"><a href="/news" target="">News</a></div>
+<div style="padding-bottom:5px"><a href="/board/v" target="">Video Games</a></div>
+<div style="padding-bottom:5px"><a href="/board/ho" target="">Other</a></div><br /><hr /><br /><div id="sidebar-admin-links"><h3>Admin Links</h3><div style="padding-bottom:5px"><a href="/panel" target="">Admin Panel</a></div><div style="padding-bottom:5px"><a href="/logoff" target="">Log Off</a></div></div><h3>Information</h3><div style="padding-bottom:5px"><a href="/" target="_top">HOME</a></div><div style="padding-bottom:5px"><a href="https://archive.4taba.net" target="">Archive</a></div><div style="padding-bottom:5px"><a href="/about" target="">About</a></div><div style="padding-bottom:5px"><a href="/rules" target="">Rules</a></div><div style="padding-bottom:5px"><a href="/news" target="">News</a></div>
 `;
 
     hideAdminLinks();
@@ -63,6 +68,16 @@ function hideAdminLinks() {
     }
 }
 
+function hideThread(e, target_id){
+    var thread_body = document.getElementById(target_id);
+    var display_type = thread_body.style.display == "none" ? "block" : "none";
+
+    thread_body.style.display = display_type;
+    localStorage[target_id] = display_type;
+
+    return false;
+}
+
 function thumbnailClick(e) {
     var src = e.src;
     var swap = e.dataset.swapWith;
@@ -75,8 +90,8 @@ function thumbnailClick(e) {
         p = p.offsetParent;
     }
 
-    if (['JPEG','PNG','GIF'].indexOf(mimetype) > -1) {
-        //e.style.opacity = 0.5;
+    if (['JPEG','PNG','GIF', 'WEBP'].indexOf(mimetype) > -1) {
+        e.style.opacity = 0.5;
         e.src = swap;
         e.dataset.swapWith = src;
         if (window.scrollY > offsetTop) {
@@ -86,4 +101,12 @@ function thumbnailClick(e) {
     } else {
         return true;
     }
+}
+
+function swapIsLoaded(e){
+	e.style.opacity = 1;
+}
+
+function postNumClick(e){
+	document.forms[1].elements["comment"].value+=">>"+e.textContent;
 }

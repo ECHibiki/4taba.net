@@ -99,6 +99,7 @@
   (let* ((port (open-pipe* OPEN_READ "identify" "-format" "%wx%h" (string-append file "[0]")))
          (dims (read-line port)))
     (close-pipe port)
+(display file)(newline)
     (if (string-prefix? "identify:" dims)
       #f
       dims)))
@@ -107,7 +108,8 @@
   (let* ((port (open-pipe* OPEN_READ "ffprobe" "-v" "error" "-select_streams" "v:0" "-show_entries" "stream=width,height" "-of" "csv=s=x:p=0" video))
          (dims (read-line port)))
     (close-pipe port)
-    (if (string-contains dims "Invalid")
+	(display dims)(newline)
+    (if (or (eof-object? dims) (string-contains dims "Invalid"))
       #f
       dims)))
 
@@ -127,6 +129,7 @@
       ((image/gif) 'GIF)
       ((image/jpeg) 'JPEG)
       ((image/png) 'PNG)
+      ((image/webp) 'WEBP)
       ((video/mp4) 'MP4)
       ((video/x-matroska) 'MKV)
       ((video/webm) 'WEBM)

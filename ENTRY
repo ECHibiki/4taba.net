@@ -23,7 +23,7 @@
 
 ;(database-connection-init)
 (init-server #:statics '(jpg jpeg png ico html js css md txt woff))
-
+;(init-server )
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Setup page rules ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -32,7 +32,7 @@
                      (string-append "(" (string-join (map (lambda (b) (car b)) boards) "|") ")"))))
 
   ;; Serve all uploaded statics
-  (get "/pub/img/.*/.*\\..*"
+   (get "/pub/img/.*/.*"
        ;static-page-emitter)
        (lambda (rc)
          (let ((path (map (lambda (str)

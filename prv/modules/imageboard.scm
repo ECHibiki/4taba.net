@@ -227,6 +227,41 @@
                      #f)))
     (save-post rc mtable board #:existing-thread thread)))
 
+; see reluctant-code-tags for usage
+(define (make-reluctant-processor tagspec outputopen outputclose)
+  (let* ((tagnames   (string-split tagspec #\space))
+         (tagor      (string-join tagnames "|"))
+         (regexpopen (make-regexp (string-append "\\[(" tagor ")\\]")))
+         (table      (make-hash-table)))
+    (for-each (lambda (s) (hash-set! table s (make-regexp (string-append "\\[/" s "\\]")))) tagnames)
+    (letrec ((outside (lambda (s outlistrev)
+               (let ((m (regexp-exec regexpopen s)))
+                 (if m
+                     (inside (match:suffix m)
+                             (cons* (match:substring m)
+                                    (match:prefix m)
+                                    outlistrev)
+                             (match:substring m 1))
+                     (string-concatenate-reverse outlistrev s)))))
+             (inside  (lambda (s outlistrev open)
+               (let ((m (regexp-exec (hash-ref table open) s)))
+                 (if m
+                     (outside (match:suffix m)
+                              (cons* outputclose
+                                     (match:prefix m)
+                                     outputopen
+                                     (cdr outlistrev)))
+                     (string-concatenate-reverse outlistrev s))))))
+      (lambda (s) (outside s '())))))
+
+(define reluctant-code-tags
+  (make-reluctant-processor
+    "codeblock code c"
+    "<div class=''code''>"
+    "</div>"))
+
+
+
 (define (refilter-comments rc)
   (let* ((mtable (map-table-from-DB (:conn rc)))
          (cookies (get-cookie-alist rc))
@@ -325,7 +360,7 @@
                         (remove (lambda (x)
                                   (not (member (assoc-ref (car admin) "name") (string-split (assoc-ref x "read") #\space))))
                                 full)))))))
-    (string-join 
+    (string-join
      (map (lambda (note)
             (let ((id (assoc-ref note "id"))
                   (type (assoc-ref note "type"))
@@ -413,7 +448,7 @@
     ;(:cookies-set! rc 'cc "style" style)
     ;(:cookies-setattr! rc 'cc #:expires 315360000 #:path "/" #:secure #f #:http-only #f)
     ;(:cookies-update! rc) ;; FIXME: Documentation says this isn't needed, but it seems to be
-    (redirect-to rc (uri-path referer) #:scheme scheme)))
+    (redirect-to rc (uri-path referer))))
 
 (define (mod-login rc)
   (let* ((mtable (map-table-from-DB (:conn rc)))
@@ -435,16 +470,23 @@
               ;(:cookies-set! rc 'cc "admin" "1")
               ;(:cookies-setattr! rc 'cc #:expires 315360000 #:path "/" #:secure #f #:http-only #f)
               ;(:cookies-update! rc) ;; FIXME: Documentation says this isn't needed, but it seems to be
-              
+
               ;; -----------------------------------------------
-              ;; FIXME: These aren't needed except to get scheme
               (let* ((request ((record-accessor (record-type-descriptor rc) 'request) rc))
                      (headers ((record-accessor (record-type-descriptor request) 'headers) request))
+
                      (referer (assoc-ref headers 'referer))
-                     (scheme ((record-accessor (record-type-descriptor referer) 'scheme) referer)))
+                     (scheme ((record-accessor (record-type-descriptor referer) 'scheme) referer))
+                     (host ((record-accessor (record-type-descriptor referer) 'host) referer))
+					 (direct_uri (build-uri scheme #:host host #:path "/panel")))
                 ;; -----------------------------------------------
                 ;; -----------------------------------------------
-                (redirect-to rc "/panel" #:scheme scheme)))))))))
+                (redirect-to rc direct_uri)
+				)
+			))
+		  ))
+		)
+	))
 
 (define (mod-logoff rc mtable cookies)
   (let ((key (assoc-ref cookies "mod-key")))
@@ -542,7 +584,7 @@
               'pre
               (lambda (m)
                 (let ((parts (string-split (match:substring m) #\/)))
-                  (string-append "<a target='_top' href='"
+                  (string-append "<a target=''_top'' href=''"
                                  ;(string-join
                                  ; (append `(,(car parts))
                                  ;         (map (lambda (x)
@@ -550,14 +592,14 @@
                                  ;              (cdr parts)))
                                  ; "/")
                                  (match:substring m)
-                                 "'>" (match:substring m) "</a>")))
+                                 "''>" (match:substring m) "</a>")))
                 'post)) ; FIXME : add quotes around the href and target once you figure out how to escape chars properly
-          (lambda (p) ; Board link 
+          (lambda (p) ; Board link
             (regexp-substitute/global #f "&gt;&gt;&gt;/*[^/]+/([^0-9]|$)" p
               'pre
               (lambda (m)
                 (let* ((brd (substring (match:substring m) 13 (- (string-length (match:substring m)) 1))))
-                  (format #f "<a href='/board/~a'>~a</a>" brd (match:substring m))))
+                  (format #f "<a href=''/board/~a''>~a</a>" brd (match:substring m))))
               'post))
           (lambda (p) ; Cross-page link matching
             ;(regexp-substitute/global #f "&gt;&gt;&gt;[a-zA-Z0-9/,-\\#]*[a-zA-Z0-9]" p
@@ -589,7 +631,7 @@
                            ;                 (string-append "#" psts "p")
                            ;                 (string-append "/" psts))
                            ;               ">" (match:substring m) "</a>")
-                           (format #f "<a href='/~a/~a/~a~a'>~a</a>"
+                           (format #f "<a href=''/~a/~a/~a~a''>~a</a>"
                                    (if (= (length lnks) 1) "thread" "posts")
                                    brd trd
                                    (if (= (length lnks) 1) (string-append "#" psts "p")
@@ -623,7 +665,7 @@
                            ;                 (string-append "#" psts "p")
                            ;                 (string-append "/" psts))
                            ;               ">" (match:substring m) "</a>")
-                           (format #f "<a href='/~a/~a/~a~a'>~a</a>"
+                           (format #f "<a href=''/~a/~a/~a~a''>~a</a>"
                                    (if (= (length lnks) 1) "thread" "posts")
                                    board trd
                                    (if (= (length lnks) 1) (string-append "#" psts "p")
@@ -638,7 +680,7 @@
                          ;                 (string-append "#" psts "p")
                          ;                 (string-append "/" psts))
                          ;               ">" (match:substring m) "</a>")))
-                         (format #f "<a href='/~a/~a/~a~a'>~a</a>"
+                         (format #f "<a href=''/~a/~a/~a~a''>~a</a>"
                                  (if (= (length lnks) 1) "thread" "posts")
                                  board thread
                                  (if (= (length lnks) 1) (string-append "#" psts "p")
@@ -651,13 +693,16 @@
               'pre (lambda (m) (string-append "<i>" (match:substring m) "</i>")) 'post))
           (lambda (p) ; Spoiler matching
             (regexp-substitute/global #f "\\[spoiler\\].*\\[/spoiler\\]" p
-              'pre (lambda (m) (string-append "<span class='spoiler'>" (substring (match:substring m) 9 (- (string-length (match:substring m)) 10)) "</span>")) 'post))
+              'pre (lambda (m) (string-append "<span class=''spoiler''>" (substring (match:substring m) 9 (- (string-length (match:substring m)) 10)) "</span>")) 'post))
           (lambda (p) ; AA matching
             (regexp-substitute/global #f "\\[aa\\].*\\[/aa\\]" p
-              'pre (lambda (m) (string-append "<span class='aa'>" (substring (match:substring m) 4 (- (string-length (match:substring m)) 5)) "</span>")) 'post))
-          (lambda (p) ; Code matching
-            (regexp-substitute/global #f "\\[code\\].*\\[/code\\]" p
-              'pre (lambda (m) (string-append "<div class='code'>" (substring (match:substring m) 6 (- (string-length (match:substring m)) 7)) "</div>")) 'post))
+              'pre (lambda (m) (string-append "<span class=''aa''>" (substring (match:substring m) 4 (- (string-length (match:substring m)) 5)) "</span>")) 'post))
+			 (lambda (p) ; Code matching
+			 (newline)(newline)  (display p)(newline)(newline)
+		 (reluctant-code-tags p))
+		  ;(regexp-substitute/global #f "\\[code\\].*\\[/code\\]" p
+			  ;    'pre (lambda (m) (string-append "<div class=''code''>" (substring (match:substring m) 6 (- (string-length (match:substring m)) 7)) "</div>")) 'post))
+
           (lambda (p) ; Convert all newlines to <br>, this is done last because matching \n in regex is easier than matching <br>
             (regexp-substitute/global #f "\n" p
               'pre "<br>" 'post)))))
@@ -770,7 +815,7 @@
              cc (>= cc 1)
              (equal? (assoc-ref (car admin) "name")
                      (substring name 0 cc)))
-        (string-append "<span class=capcode>" (assoc-ref (car admin) "name") " ## " (substring name (+ cc 4)) " <img title='Mod' style='vertical-align:bottom' src='/pub/img/capcode.png'></span>")
+        (string-append "<span class=capcode>" (assoc-ref (car admin) "name") " ## " (substring name (+ cc 4)) " <img title=''Mod'' style=''vertical-align:bottom'' src=''/pub/img/capcode.png''></span>")
         name)))
 
 (define (get-threadnum mtable board)
@@ -802,12 +847,16 @@
              (name (escape-str (or-blank (assoc-ref data 'name)
                                          (assq-ref (assoc-ref boards board) 'name)
                                          default-name)))
+
              (options (string-split (or (assoc-ref data 'options) "") #\space))
-             (sage (lset-intersection equal? '("sage" "SAGE" "さげ" "下げ") options))
+             ;(sage (lset-intersection equal? '("sage" "SAGE" "さげ" "下げ") options))
+             (sage '())
              (noko (or (and noko-enabled (member "noko" options))
                        (and (not noko-enabled) (not (member "nonoko" options)))))
-             (nokosage (member "nokosage" options))
-             (subpost (filter string->number options))
+             ;(nokosage (member "nokosage" options))
+             (nokosage '() )
+
+			 (subpost (filter string->number options))
              (pass (or (assoc-ref data 'password) ""))
              ;(date (date->string (current-date) "(~k:~M) ~a ~b ~e, ~Y"))
              (date (get-datestring))
@@ -824,7 +873,9 @@
              ;(tname (string->symbol (string-append "thread" (number->string threadnum)))))
 
         ;; FIXME: There's probably a better way to do this
+
         (set-password rc pass)
+
         (let ((file-info (store-uploaded-files rc #:path (string-append (getcwd) "/pub/img/upload")
                                                #:uid #f
                                                #:gid #f
@@ -832,7 +883,7 @@
                                                #:mode #o664
                                                #:path-mode #o775
                                                #:sync #t)))
-          (let* ((filename (if (null? (caddr file-info)) "" (escape-str (caaddr file-info))))
+          (let* ((filename (if (null? (caddr file-info)) "" (caaddr file-info)))
                  (mimetype (get-mimetype (string-append (getcwd) "/pub/img/upload/" filename)))
                  (mimetypes-OP-blacklist (or (assq-ref (assoc-ref boards board) 'mimetypes-OP-blacklist) default-OP-mimetypes-blacklist))
                  (mimetypes-blacklist (or (assq-ref (assoc-ref boards board) 'mimetypes-blacklist) default-mimetypes-blacklist))
@@ -870,12 +921,13 @@
                                 (rename-file (string-append (getcwd) "/pub/img/upload/" filename) fullpath)
                                 ;(cons newname newthumbname)))))
                                 ;; FIXME: replace this extension case with actual mimetype detection?
+				(display mimetype)
                                 (case mimetype
-                                  ((GIF JPEG PNG) ; IMAGES
+                                  ((GIF JPEG PNG WEBP) ; IMAGES
                                    (make-image-thumbnail fullpath max-dimensions (string-append fullthumb "." extension))
                                    (cons* newfile (string-append newthumb "." extension) mimetype
                                           (get-image-dimensions fullpath)))
-                                  ((FLAC M4A MKV MP3 MP4 OCTET OGG WAV WEBM WMA) ; Audio/Video/Octet-streams
+                                  ((FLAC M4A MKV MP3 MP4 OCTET OGG WAV WMA WEBM) ; Audio/Video/Octet-streams
                                    (make-video-thumbnail fullpath max-dimensions (string-append fullthumb ".jpg"))
                                    (if (file-exists? (string-append fullthumb ".jpg"))
                                      (cons* newfile (string-append newthumb ".jpg") mimetype
@@ -945,7 +997,8 @@
                             (> (string->number (car subpost)) 1))
                      (database-save-subpost mtable board threadnum (string->number (car subpost)) ip (process-name-codes admin name) date ctime comment)
                      (begin
-                       (database-save-post mtable board threadnum postnum ip (or nokosage sage) (process-name-codes admin name) date ctime finfo filename fsize comment)
+			;filename is not safe for html output so save to db in safe format
+                       (database-save-post mtable board threadnum postnum ip (or nokosage sage) (process-name-codes admin name) date ctime finfo (escape-str filename) fsize comment)
                        (if existing-thread
                          (database-update-thread mtable board threadnum postnum (or nokosage sage) ctime btime)
                          (begin
@@ -957,15 +1010,19 @@
 
                    ;; -----------------------------------------------
                    ;; FIXME: These aren't needed except to get the scheme
-                   (let* ((request ((record-accessor (record-type-descriptor rc) 'request) rc))
-                          (headers ((record-accessor (record-type-descriptor request) 'headers) request))
-                          (referer (assoc-ref headers 'referer))
-                          (scheme ((record-accessor (record-type-descriptor referer) 'scheme) referer)))
+              (let* ((request ((record-accessor (record-type-descriptor rc) 'request) rc))
+                     (headers ((record-accessor (record-type-descriptor request) 'headers) request))
+
+                     (referer (assoc-ref headers 'referer))
+                     (scheme ((record-accessor (record-type-descriptor referer) 'scheme) referer))
+                     (host ((record-accessor (record-type-descriptor referer) 'host) referer))
+					 )
+
                    ;; -----------------------------------------------
                    ;; -----------------------------------------------
                      (if (or noko nokosage)
-                       (redirect-to rc (string-append "/thread/" (uri-encode board) "/" (number->string threadnum)) #:scheme scheme)
-                       (redirect-to rc (string-append "/board/" (uri-encode board)) #:scheme scheme))))))))))))))
+                       (redirect-to rc (string-append "/thread/" (uri-encode board) "/" (number->string threadnum)))
+                       (redirect-to rc (string-append "/board/" (uri-encode board))))))))))))))))
 
 (define (post-note rc)
   (let* ((mtable (map-table-from-DB (:conn rc)))
@@ -991,13 +1048,14 @@
              (request ((record-accessor (record-type-descriptor rc) 'request) rc))
              (headers ((record-accessor (record-type-descriptor request) 'headers) request))
              (referer (assoc-ref headers 'referer))
-             (scheme ((record-accessor (record-type-descriptor referer) 'scheme) referer)))
+             (scheme ((record-accessor (record-type-descriptor referer) 'scheme) referer))
+             (host ((record-accessor (record-type-descriptor referer) 'host) referer)))
              ;; -----------------------------------------------
              ;; -----------------------------------------------
         (if (equal? id "new")
           (begin
             (database-new-note mtable type name perms-read perms-write subject ctime date body)
-            (redirect-to rc "/panel" #:scheme scheme))
+            (redirect-to rc (build-uri scheme #:host host #:path "/panel")))
 
           (let* ((note (database-get-note mtable id))
                  (creator (assoc-ref (car note) "name"))
@@ -1012,7 +1070,7 @@
                 (if (equal? del "delete")
                   (database-delete-note rc id)
                   (database-update-note mtable type perms-read perms-write subject ctime name date body id))
-                (redirect-to rc "/panel" #:scheme scheme))
+                (redirect-to rc (build-uri scheme #:host host #:path "/panel")))
               (throw 'artanis-err 401 post-note "Unauthorized."))))))))
 
 (define (prune-unlisted rc mtable ctime) ; FIXME: replace rc with mtable once the database calls can use mtable only
@@ -1045,7 +1103,7 @@
               'depth 'mount 'physical))
       (when (null? (scandir boarddir))
         (rmdir boarddir)))))
-            
+
 (define (delete-post rc board threadnum postnum)
   (database-delete-post rc board threadnum postnum))
 
@@ -1083,7 +1141,7 @@
                 (lambda (post status)
                   (let ((lst (string-split post #\/)))
                     (if (= (length lst) 3)
-                      (let* ((board (car lst))
+                      (let* ((board (uri-decode (car lst)))
                              (threadnum (cadr lst))
                              (postnum (caddr lst))
                              (table (database-get-post-with-ip mtable board threadnum postnum ip))
@@ -1107,7 +1165,7 @@
                 (lambda (post status)
                   (let ((lst (string-split post #\/)))
                     (if (= (length lst) 3)
-                      (let* ((board (car lst))
+                      (let* ((board (uri-decode (car lst)))
                              (threadnum (cadr lst))
                              (postnum (caddr lst))
                              (table (database-get-post-with-ip mtable board threadnum postnum ip))
@@ -1129,7 +1187,7 @@
                 (lambda (post status)
                   (let ((lst (string-split post #\/)))
                     (if (= (length lst) 3)
-                      (let* ((board (car lst))
+                      (let* ((board (uri-decode (car lst)))
                              (threadnum (cadr lst))
                              (postnum (caddr lst)))
                         (if admin
@@ -1147,7 +1205,7 @@
                 (lambda (post status)
                   (let ((lst (string-split post #\/)))
                     (if (= (length lst) 3)
-                      (let* ((board (car lst))
+                      (let* ((board (uri-decode (car lst)))
                              (threadnum (cadr lst))
                              (postnum (caddr lst)))
                         (if (and admin
@@ -1165,7 +1223,7 @@
                 (lambda (post status)
                   (let ((lst (string-split post #\/)))
                     (if (= (length lst) 3)
-                      (let* ((board (car lst))
+                      (let* ((board (uri-decode (car lst)))
                              (threadnum (cadr lst))
                              (postnum (caddr lst))
                              (ctime (time-second (current-time time-utc))))
